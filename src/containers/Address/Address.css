@@ -8,3 +8,8 @@
     box-sizing: border-box;
     cursor: pointer;
 }
+.Address p {
+    margin-block-end: 0.2em;
+    text-align: left;
+    margin-block-start: 0.2em;
+}

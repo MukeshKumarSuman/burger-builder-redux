@@ -9,12 +9,13 @@ const order = props => {
         }
     }
 
-    const ingredientOutput = ingredients.map( ig => <span>{ig.nmae} ({ig.count})</span>);
+    const ingredientOutput = ingredients.map( ig => <span key={ig.nmae}>{ig.nmae} ({ig.count})</span>);
     return (
             <div className={classes.Order}> 
                 <p>Ingrdeeints: {ingredientOutput}</p>
                 <p>Delivery Method: <strong>{props.deliveryMethod}</strong></p>
-                <p>Price: <strong>INR {Number.parseFloat(props.totalPrice).toFixed(2)}</strong></p>
+                <p>Price: <strong>INR {Number.parseFloat(props.price).toFixed(2)}</strong></p>
+                <button onClick={props.deleteOrder}>Delete</button>
             </div>
         );
 }

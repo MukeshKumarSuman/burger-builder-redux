@@ -1,4 +1,5 @@
 import React , { Component } from 'react';
+import { connect } from 'react-redux';
 import axios from '../../axios-order';
 import classes from './Address.css';
 class Address extends Component {
@@ -23,7 +24,6 @@ class Address extends Component {
     */
     componentDidMount() {
         axios.get(`/users/${this.props.username}/addresses`).then( resp => {
-            console.log(resp);
             this.setState({addresses: resp.data});
         }).catch( error => console.log(error));
     }
@@ -33,7 +33,7 @@ class Address extends Component {
     render() {
         const address = this.state.addresses.map( address => {
             return (
-                <div onClick={ () => this.addressClickedHandler(address.id)} className={classes.Address}>
+                <div key={address.id} onClick={ () => this.addressClickedHandler(address.id)} className={classes.Address}>
                     <p>Name: {address.fullName}</p>
                     <p>Street Address: {address.streetAddress}</p>
                     <p>Landmark: {address.landmark}</p>
@@ -54,5 +54,9 @@ class Address extends Component {
         );
     }
 }
-
-export default Address;
+const mapStateToProps = state => {
+    return {
+        username: state.burgerBuilder.customer.username
+    }
+}
+export default connect(mapStateToProps)(Address);

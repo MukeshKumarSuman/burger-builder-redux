@@ -4,6 +4,7 @@ import { Route } from 'react-router-dom';
 import ContactData from '../ContactData/ContactData';
 import Address from '../Address/Address';
 
+
 class OrderAddress extends React.Component {
     state = {
         address: [],
@@ -40,15 +41,10 @@ class OrderAddress extends React.Component {
         return (
             <div className={classes.OrderAddress}>
                 {addressChooser}
-                <Route path={this.props.match.path + '/contact-data'} render={(props) => (
-                        <ContactData  {...this.props}/>
-                    )}/>
-                <Route path={this.props.match.path + '/address'} render={(props) => (
-                        <Address username={this.props.username}/>
-                    )}/>
+                <Route path={this.props.match.path + '/contact-data'} component={ContactData}/>
+                <Route path={this.props.match.path + '/address'} component={Address}/>
             </div>
         ); 
     }
 }
-
 export default OrderAddress;
