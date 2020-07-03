@@ -13,3 +13,12 @@
         width: 500px;
     }
 }
+
+.Error {
+    color: red;
+}
+
+.Registration {
+    cursor: pointer;
+    color: royalblue;
+}

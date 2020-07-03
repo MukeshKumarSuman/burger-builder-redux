@@ -19,7 +19,7 @@ const orderSummary = props => {
             <p><strong>Total Price: {props.price}</strong></p>
             <p>Continue to Checkout?</p>
             <Button clicked={props.purchaseCancelled} btnType='Danger'>CANCLE</Button>
-            <Button  btnType='Success' clicked={props.purchaseContinued}>CONTINUE</Button>
+            <Button  btnType='Success' clicked={props.purchaseContinued}>{props.isAuth ? 'CONTINUE' : 'SIGN UP TO CONTINUE'}</Button>
         </Aux>
     );
 };

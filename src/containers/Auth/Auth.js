@@ -4,6 +4,8 @@ import Input from '../../components/UI/Input/Input';
 import Button from '../../components/UI/Button/Button';
 import classes from './Auth.css';
 import * as actionCreator from '../../store/actions';
+import Spinner from '../../components/UI/Spinner/Spinner';
+import { Redirect } from 'react-router-dom';
 
 class Auth extends React.Component {
     state = {
@@ -40,6 +42,13 @@ class Auth extends React.Component {
         formIsValid: false   
     }
 
+    componentDidMount() {
+        if (!this.props.buildingBurger && this.props.authRedirectPath !== '/') {
+            this.props.setAuthRedirectPath('/');
+        } else {
+            this.props.setRegistrationRedirectPath("/checkout");
+        }
+    }
 
     onChangedHandler = (event, inputIdentifier ) => {
         const updatedControls = {...this.state.controls};
@@ -83,6 +92,10 @@ class Auth extends React.Component {
         this.props.authenticate(authData);
     }
 
+    redirectToRegistration = (event) => {
+        event.preventDefault();
+        this.props.history.push('/register');
+    }
     render() {
         const formElementArrays = [];
         for (let key in this.state.controls) {
@@ -91,24 +104,55 @@ class Auth extends React.Component {
                 config: this.state.controls[key]
             });
         }
-        let form = (
-            <form onSubmit={this.authenticate}>
-                {formElementArrays.map( formElement => <Input label={formElement.id} invalid={formElement.config.validation !== undefined ? !formElement.config.valid : false} 
-                                                            touched={formElement.config.touched}
-                                                            changedHandler={(event) => this.onChangedHandler(event, formElement.id)}
-                                                             key={formElement.id} {...formElement.config}/>)}
-                <Button btnType="Success" disabled={!this.state.formIsValid}>SUBMIT</Button>
-            </form>
-        );
+        let form  = <Spinner />;
+        if (!this.props.loading) {
+            form = (
+                <form onSubmit={this.authenticate}>
+                    {formElementArrays.map( formElement => <Input label={formElement.id} invalid={formElement.config.validation !== undefined ? !formElement.config.valid : false} 
+                                                                touched={formElement.config.touched}
+                                                                changedHandler={(event) => this.onChangedHandler(event, formElement.id)}
+                                                                 key={formElement.id} {...formElement.config}/>)}
+                    <Button btnType="Success" disabled={!this.state.formIsValid}>SUBMIT</Button>
+                </form>
+            );
+        }
+        let errorMessage = null;
+        if (this.props.error) {
+            errorMessage = (
+                <>
+                    <p className={classes.Error}><strong>{this.state.controls.username.value}</strong> {this.props.error.response.data.message}</p>
+                    <p>Please, click <strong className={classes.Registration} onClick={this.redirectToRegistration}>here...</strong> to start your registration</p>
+                </>
+            );
+        }
+
+        let authRedirect = null;
+        if (this.props.isAuthenticated) {
+            authRedirect = <Redirect to={this.props.authRedirectPath} />
+        }
         return (
-            <div className={classes.Auth}> {form}</div>
+            <div className={classes.Auth}>
+                {authRedirect}
+                {errorMessage}
+                {form}
+            </div>
         );
     }
 }
-
+const mapStateToProps = state => {
+    return {
+        loading: state.auth.loading,
+        error: state.auth.error,
+        isAuthenticated: state.auth.username != null,
+        buildingBurger: state.burgerBuilder.building,
+        authRedirectPath: state.auth.authRedirectPath
+    }
+}
 const mapDispatchToProps = dispatch => {
     return {
-        authenticate: (authData) => dispatch(actionCreator.authenticate(authData))
+        authenticate: (authData) => dispatch(actionCreator.authenticate(authData)),
+        setAuthRedirectPath: (path) => dispatch(actionCreator.setAuthRedirectPath(path)),
+        setRegistrationRedirectPath: (path) => dispatch(actionCreator.setRegistrationRedirectPath(path))
     }
 }
-export default connect(null, mapDispatchToProps)(Auth);
+export default connect(mapStateToProps, mapDispatchToProps)(Auth);

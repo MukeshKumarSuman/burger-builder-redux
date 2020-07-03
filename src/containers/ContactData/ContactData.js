@@ -231,29 +231,28 @@ class ContactData extends Component {
                 config: this.state.orderForm[key]
             });
         }
-        let form = (
-            <form onSubmit={this.orderHandler}>
-                {formElementArrays.map( formElement => <Input label={formElement.id} invalid={formElement.config.validation !== undefined ? !formElement.config.valid : false} 
-                                                            touched={formElement.config.touched}
-                                                            changedHandler={(event) => this.onChangedHandler(event, formElement.id)}
-                                                             key={formElement.id} {...formElement.config}/>)}
-                <Button btnType="Success" disabled={!this.state.formIsValid}>ORDER</Button>
-            </form>
-        );
+        let form = formElementArrays.map( formElement => <Input label={formElement.id} invalid={formElement.config.validation !== undefined ? !formElement.config.valid : false} 
+            touched={formElement.config.touched}
+            changedHandler={(event) => this.onChangedHandler(event, formElement.id)}
+             key={formElement.id} {...formElement.config}/>);
+            
         if (this.props.loading) {
             form = <Spinner />
         }
         return (
-            <> {form}</>
+            <> 
+                {form}
+                <Button btnType="Success" disabled={!this.state.formIsValid} clicked={this.orderHandler} >ORDER</Button>
+            </>
         );
     }
 }
 const mapStateToProps = state => {
     return {
-        ingredients: state.burgerBuilder.customer.order.ingredients,
-        orderId: state.burgerBuilder.customer.order.id,
+        ingredients: state.burgerBuilder.order.ingredients,
+        orderId: state.burgerBuilder.order.id,
         loading: state.order.loading,
-        username: state.burgerBuilder.customer.username
+        username: state.auth.username
     }
 }
 

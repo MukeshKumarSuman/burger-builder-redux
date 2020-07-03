@@ -27,6 +27,8 @@ class OrderAddress extends React.Component {
        
     }
 
+    
+
     render () {
         const addressType = this.state.addressType.value;
         const addressChooser = this.state.addressType.options.map( option => {

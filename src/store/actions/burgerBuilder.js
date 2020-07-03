@@ -1,5 +1,6 @@
 import * as actionTypes from './actionTypes';
 import axios from '../../axios-order';
+import * as Constants from '../../constants/constants';
 
 export const addIngredient = ingredientName => {
     return {
@@ -15,28 +16,26 @@ export const removeIngredient = ingredientName => {
     }
 }
 
-export const setCustomer =  customer => {
+export const setDefaultOrderIngredients =  order => {
     return {
-        type: actionTypes.SET_CUSTOMER,
-        customer
+        type: actionTypes.SET_DEFAULT_ORDER_INGREDIENTS,
+        order
     }
 }
 
-export const fetchIngredientsFailed =  () => {
+export const fetchDefaultOrderIngredientsFailed =  () => {
     return {
-        type: actionTypes.FETCH_INGREDIENTS_FAILED
+        type: actionTypes.FETCH_DEFAULT_ORDER_INGREDIENTS_FAILED
     }
 }
 
-export const initCustomer = () => {
+export const initDefaultOrderIngredients = () => {
     return dispatch => {
-        axios.get('users/mukesh')
+        axios.get('/order')
         .then( response => {
-            const order = response.data.orders.filter(order => order.status === 'CREATE')[0];
-            const customer = {...response.data, order}
-            dispatch(setCustomer(customer));
+            dispatch(setDefaultOrderIngredients(response.data));
         }).catch( error => {
-            dispatch(fetchIngredientsFailed())
+            dispatch(fetchDefaultOrderIngredientsFailed())
         });
     }
 }

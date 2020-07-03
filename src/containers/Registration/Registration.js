@@ -1,9 +1,11 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import { Redirect } from 'react-router-dom';
 import Input from '../../components/UI/Input/Input';
 import Button from '../../components/UI/Button/Button';
 import classes from './Registration.css';
 import * as actionCreator from '../../store/actions';
+import Spinner from '../../components/UI/Spinner/Spinner';
 
 class Registration extends React.Component {
     state = {
@@ -81,6 +83,11 @@ class Registration extends React.Component {
         formIsValid: false   
     }
 
+    componentDidMount() {
+        if (!this.props.buildingBurger && this.props.registrationRedirectPath !== '/') {
+            this.props.setRegistrationRedirectPath('/');
+        }
+    }
 
     onChangedHandler = (event, inputIdentifier ) => {
         const updatedControls = {...this.state.controls};
@@ -133,24 +140,42 @@ class Registration extends React.Component {
                 config: this.state.controls[key]
             });
         }
-        let form = (
-            <form onSubmit={this.register}>
-                {formElementArrays.map( formElement => <Input label={formElement.id} invalid={formElement.config.validation !== undefined ? !formElement.config.valid : false} 
-                                                            touched={formElement.config.touched}
-                                                            changedHandler={(event) => this.onChangedHandler(event, formElement.id)}
-                                                             key={formElement.id} {...formElement.config}/>)}
-                <Button btnType="Success" disabled={!this.state.formIsValid}>SUBMIT</Button>
-            </form>
-        );
+        let form = <Spinner />;
+        if (!this.props.loading) {
+            form = (
+                <form onSubmit={this.register}>
+                    {formElementArrays.map( formElement => <Input label={formElement.id} invalid={formElement.config.validation !== undefined ? !formElement.config.valid : false} 
+                                                                touched={formElement.config.touched}
+                                                                changedHandler={(event) => this.onChangedHandler(event, formElement.id)}
+                                                                 key={formElement.id} {...formElement.config}/>)}
+                    <Button btnType="Success" disabled={!this.state.formIsValid}>SUBMIT</Button>
+                </form>
+            );
+        }
+        let registrationRedirectPath = null;
+        if (this.props.isAuthenticated) {
+            registrationRedirectPath = <Redirect to={this.props.registrationRedirectPath} />
+        }
         return (
-            <div className={classes.Registration}> {form}</div>
+            <div className={classes.Registration}>
+                {registrationRedirectPath}
+                {form}
+            </div>
         );
     }
 }
-
+const mapStateToProps = state => {
+    return {
+        loading: state.registration.loading,
+        buildingBurger: state.burgerBuilder.building,
+        registrationRedirectPath: state.registration.registrationRedirectPath,
+        isAuthenticated: state.auth.username !== null
+    }
+}
 const mapDispatchToProps = dispatch => {
     return {
-        register: (userData) => dispatch(actionCreator.register(userData))
+        register: (userData) => dispatch(actionCreator.register(userData)),
+        setRegistrationRedirectPath: (path) => dispatch(actionCreator.setRegistrationRedirectPath(path))
     }
 }
-export default connect(null, mapDispatchToProps)(Registration);
+export default connect(mapStateToProps, mapDispatchToProps)(Registration);

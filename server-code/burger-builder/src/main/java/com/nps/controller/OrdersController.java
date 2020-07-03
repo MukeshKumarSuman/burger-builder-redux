@@ -33,9 +33,9 @@ import com.nps.repository.OrderRepository;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
-@RequestMapping("/burger12")
+@RequestMapping("/burger")
 @Transactional
-public class BurgerBuilderController {
+public class OrdersController {
 	
 	
 	@Autowired
@@ -50,103 +50,35 @@ public class BurgerBuilderController {
 	@Autowired
 	AddressRepository addressRepository;
 	
-	@GetMapping("/users")
-	public List<Customer> getAllCustomers() {
-		return customerRepository.findAll();
-	}
 	
-	@GetMapping("/users/{username}")
-	public ResponseEntity<Customer> getCustomerFullDetails(@PathVariable String username) {
-		Customer customer = customerRepository.findByUsername(username).get();
-		return ResponseEntity.ok(customer);
-	}
-	
-	@GetMapping("/users/{username}/address")
-	public ResponseEntity<?> getCustomerAllAddress(@PathVariable String username) {
-		Optional<Customer> customer = customerRepository.findByUsername(username);
-		return ResponseEntity.ok(customer.get().getAddress());
-	}
-	/*
-		{
-		    "username": "mukesh",
-		    "fullName": "Mukesh Kumar Suman",
-		    "email": "mukesh060220@gmail.com",
-		    "contactNumber": "7542007544",
-		    "address": [{
-		    	"fullName": "Mukesh Kumar Suman",
-		    	"streetAddress": "SDO Road, North Anderkila",
-		    	"landmark": "Opposite Town High School",
-		    	"city": "Hajipur",
-		    	"state": "Bihar",
-		    	"country": "India",
-		    	"zipCode": "844101",
-		    	"contactNumber": "7542007544",
-		    	"addressType": "Home"
-		    }]
-		}
-	*/
-	// 1st time entry of user
-	@PostMapping("/users")
-	public ResponseEntity<?> saveCustomer( @RequestBody Customer customer) {
-		Ingredients ingredients =  new Ingredients(); 
-		Address address = customer.getAddress().get(0);
-		address.setCustomer(customer);
+	@GetMapping("/order")
+	public ResponseEntity<?> getOrder() {
 		Orders order = new Orders();
-		order.setIngredients(ingredients)
-			.setPrice(order.getTotalPrice())
-			.setAddress(address);
-		customer.addOrder(order);
-		Customer createdCcustomer = customerRepository.save(customer);
-		if (createdCcustomer == null) {
-			return ResponseEntity.notFound().build();
-		}
-		URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
-		          .path("/{id}")
-		          .buildAndExpand(createdCcustomer.getId())
-		          .toUri();
-		 
-		return ResponseEntity.created(uri).body(createdCcustomer);
+		Ingredients ing = new Ingredients();
+		order.setIngredients(ing);
+		order.setPrice(order.getTotalPrice());
+		return ResponseEntity.ok(order);
 	}
 	
-	/*
-		{
-		    "username": "mukesh",
-		    "fullName": "Mukesh Kumar Suman",
-		    "email": "mukesh060220@gmail.com",
-		    "contactNumber": "7542007544",
-		}
-	 */
-	// 1st time entry of user
-	@PostMapping("/register")
-	public ResponseEntity<?> saveCustomerData( @RequestBody Customer customer) {
-		
-		if (customerRepository.existsByUsername(customer.getUsername())) {
-			return new ResponseEntity(new ApiResponse(false, "Username is already in use!"), HttpStatus.BAD_REQUEST);
-		}
-		
-		Customer createdCcustomer = customerRepository.save(customer);
-		if (createdCcustomer == null) {
+	// Customer all orders
+	@GetMapping("/users/{username}/orders")
+	public ResponseEntity<?> getAllOrders(@PathVariable String username) {
+		Customer customer = customerRepository.findByUsername(username).orElse(null);
+		if (customer == null) {
 			return ResponseEntity.notFound().build();
 		}
-		
-		URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
-		          .path("/{id}")
-		          .buildAndExpand(createdCcustomer.getId())
-		          .toUri();
-		 
-		return ResponseEntity.created(uri).body(createdCcustomer);
+		return ResponseEntity.ok(customer.getOrders());
 	}
 	
-	@PostMapping("/authenticate")
-	public ResponseEntity<?> authenticate( @RequestBody AuthenticationRequest authData) {
-		
-		if (customerRepository.existsByUsername(authData.getUsername())) {
-			return new ResponseEntity(new ApiResponse(true, "Username is authenticated!"), HttpStatus.OK);
-		} else {
-			return new ResponseEntity(new ApiResponse(false, "not a valid username"), HttpStatus.BAD_REQUEST);
+	@GetMapping("/users/{username}/orders/{orderId}")
+	public ResponseEntity<?> getOrderById(@PathVariable Long orderId) {
+		Orders order = orderRepository.findById(orderId).orElse(null);
+		if (order == null) {
+			return ResponseEntity.notFound().build();
 		}
-
+		return  ResponseEntity.ok(order);
 	}
+	
 	/*
 	 "order": {
 		  "deliveryMethod": "Fast",
@@ -176,8 +108,6 @@ public class BurgerBuilderController {
 			customer.addAddress(address);
 		}
 		
-		
-		
 		requestOrder.setPrice(requestOrder.getTotalPrice());
 		customer.addOrder(requestOrder);
 		
@@ -194,24 +124,9 @@ public class BurgerBuilderController {
 		return ResponseEntity.created(uri).body(createdOorder);
 	}
 	
-	// Customer all orders
-	@GetMapping("/users/{username}/orders")
-	public ResponseEntity<?> getAllOrders(@PathVariable String username) {
-		Customer customer = customerRepository.findByUsername(username).orElse(null);
-		if (customer == null) {
-			return ResponseEntity.notFound().build();
-		}
-		return ResponseEntity.ok(customer.getOrders());
-	}
+
 	
-	@GetMapping("/users/{username}/orders/{orderId}")
-	public ResponseEntity<?> getOrderById(@PathVariable Long orderId) {
-		Orders order = orderRepository.findById(orderId).orElse(null);
-		if (order == null) {
-			return ResponseEntity.notFound().build();
-		}
-		return  ResponseEntity.ok(order);
-	}
+
 	/*
 	{
 	    "id": 1,
@@ -256,21 +171,6 @@ public class BurgerBuilderController {
 			.setSalad(ingredients.getSalad());
 	}
 
-	@DeleteMapping("/user/{id}")
-	public ResponseEntity<?> deleteCustomer( @PathVariable Long id) {
-		customerRepository.deleteById(id);
-		return ResponseEntity.ok(HttpStatus.ACCEPTED);
-	}
-	
-	// Customer all address
-	@GetMapping("/users/{username}/addresses")
-	public ResponseEntity<?> getAddresses(@PathVariable String username) {
-		Customer customer = customerRepository.findByUsername(username).orElse(null);
-		if (customer == null) {
-			return ResponseEntity.notFound().build();
-		}
-		return ResponseEntity.ok(customer.getAddress());
-	}
 	
 	@DeleteMapping("/users/{username}/orders/{orderId}")
 	public ResponseEntity<?> deleteOrder(@PathVariable String username, @PathVariable Long orderId) {
@@ -281,20 +181,4 @@ public class BurgerBuilderController {
 		return ResponseEntity.ok(HttpStatus.ACCEPTED);
 	}
 	
-	public void newCustomer() {
-		//refund.incredible@actcorp.in
-	}
-	
-	/*
-	private String getCustomerUserName() {
-		UserDetails userDetails = (UserDetails)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		return userDetails.getUsername();
-		/*
-		 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		if (!(auth instanceof AnonymousAuthenticationToken)) {
-		        // userDetails = auth.getPrincipal()
-		}
-		 
-	}
-	 */
 }

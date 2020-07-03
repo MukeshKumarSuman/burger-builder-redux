@@ -1,10 +1,13 @@
 import React , { Component } from 'react';
+import $ from 'jquery';
 import { connect } from 'react-redux';
 import axios from '../../axios-order';
 import classes from './Address.css';
+import Button from '../../components/UI/Button/Button';
+import * as actionCreator from '../../store/actions';
 class Address extends Component {
     state = {
-        addresses: []
+        addressId: null
     }
     /*
     {
@@ -23,17 +26,32 @@ class Address extends Component {
     }
     */
     componentDidMount() {
-        axios.get(`/users/${this.props.username}/addresses`).then( resp => {
-            this.setState({addresses: resp.data});
-        }).catch( error => console.log(error));
+        if (this.props.addresses.length === 0) {
+            this.props.getAddress(this.props.username);
+        }
     }
-    addressClickedHandler = (id) => {
-        console.log(id);
+
+    addressClickedHandler = (event, id) => {
+        const $prevTarget = $(`.${classes.Selected}`);
+        if($prevTarget.length && id != $prevTarget.attr('id')) {
+            $prevTarget.removeClass(classes.Selected);
+        }
+        const $currentTarget = $(event.currentTarget);
+        $currentTarget.toggleClass(classes.Selected);
+        this.setState({addressId: id === this.state.addressId ? null : id});
+    }
+
+    orderHandler = (event) => {
+        const order = {};
+        order.ingredients = this.props.ingredients;
+        delete order.ingredients.id;
+        const address = this.props.addresses.filter(address => address.id === this.state.addressId);
+        console.log(address);
     }
     render() {
-        const address = this.state.addresses.map( address => {
+        const address = this.props.addresses.map( address => {
             return (
-                <div key={address.id} onClick={ () => this.addressClickedHandler(address.id)} className={classes.Address}>
+                <div key={address.id} id={address.id} onClick={ (event) => this.addressClickedHandler(event, address.id)} className={classes.Address}>
                     <p>Name: {address.fullName}</p>
                     <p>Street Address: {address.streetAddress}</p>
                     <p>Landmark: {address.landmark}</p>
@@ -47,16 +65,25 @@ class Address extends Component {
             );
         });
         return (
-            <div>
-                <p>Please select address</p>
+            <div className={classes.container}>
+                {/*<p>Please select address</p>*/}
                 {address}
+                <Button btnType="Success" disabled={!!!this.state.addressId} clicked={this.orderHandler} >ORDER</Button>
             </div>
         );
     }
 }
 const mapStateToProps = state => {
     return {
-        username: state.burgerBuilder.customer.username
+        username: state.auth.username,
+        addresses: state.address.address,
+        ingredients: state.burgerBuilder.order.ingredients,
     }
 }
-export default connect(mapStateToProps)(Address);
+
+const mapDispatchToProps = dispatch => {
+    return {
+        getAddress: (username) => dispatch(actionCreator.getAddress(username))
+    }
+}
+export default connect(mapStateToProps, mapDispatchToProps)(Address);

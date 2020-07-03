@@ -74,7 +74,9 @@ class BurgerBuilder extends Component {
     }
 
     componentDidMount() {
-       this.props.initCustomer();
+       if (!this.props.ingredients) {
+        this.props.initDefaultOrderIngredients();
+       }
     }
 
     updatePurchaseState (ingredients) {
@@ -101,8 +103,13 @@ class BurgerBuilder extends Component {
     }
 
     purchaseContinueHandler = () => {
-       this.props.onInitPurchase();
-       this.props.history.push('/checkout');
+        this.props.onInitPurchase();
+        if (this.props.isAuthenticated) {
+            this.props.history.push('/checkout');
+        } else {
+            this.props.setAuthRedirectPath("/checkout");
+            this.props.history.push('/auth');
+        }
     }
 
     render() {
@@ -131,9 +138,10 @@ class BurgerBuilder extends Component {
             orderSummary = <OrderSummary ingredients={ingredients}
                  purchaseCancelled={this.purchaseCancleHandler}
                  purchaseContinued={this.purchaseContinueHandler}
+                 isAuth={this.props.isAuthenticated}
                  price={this.props.price}/>;
         }
-
+        
         return(
             <Aux>
                 <Modal show={this.state.purchasing} modalClosed={this.purchaseCancleHandler}>
@@ -147,9 +155,10 @@ class BurgerBuilder extends Component {
 
 const mapStateToProps = state => {
     return {
-        ingredients: state.burgerBuilder.customer && state.burgerBuilder.customer.order && state.burgerBuilder.customer.order.ingredients,
-        price: state.burgerBuilder.customer && state.burgerBuilder.customer.order && state.burgerBuilder.customer.order.price,
-        error: state.burgerBuilder.error
+        ingredients: state.burgerBuilder.order && state.burgerBuilder.order.ingredients,
+        price: state.burgerBuilder.order && state.burgerBuilder.order.price,
+        error: state.burgerBuilder.error,
+        isAuthenticated: state.auth.username != null
     }
 }
 
@@ -158,8 +167,10 @@ const mapDispatchToProps = dispatch => {
     return {
         addIngredient: (ingredientname) => dispatch(actionCreator.addIngredient(ingredientname)),
         removeIngredient: (ingredientname) => dispatch(actionCreator.removeIngredient(ingredientname)),
-        initCustomer: () => dispatch(actionCreator.initCustomer()),
-        onInitPurchase: () => dispatch(actionCreator.purchaseInit())
+        initDefaultOrderIngredients: () => dispatch(actionCreator.initDefaultOrderIngredients()),
+        onInitPurchase: () => dispatch(actionCreator.purchaseInit()),
+        setAuthRedirectPath: (path) => dispatch(actionCreator.setAuthRedirectPath(path))
+        //setRegistrationRedirectPath: (path) => dispatch(actionCreator.setRegistrationRedirectPath(path))
     }
 }
 

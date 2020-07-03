@@ -1,5 +1,6 @@
 import * as actionTypes from './actionTypes';
 import axios from '../../axios-order';
+import * as Constants from '../../constants/constants';
 
 export const purchaseBurgerSuccess = (orderId, orderData) => {
     return {
@@ -94,7 +95,7 @@ export const fetchOrdersFail = (error) => {
     }
 }
 
-export const fetchOrders = (username) => {
+export const fetchOrders = (username = localStorage.getItem(Constants.USERNAME)) => {
     return dispatch => {
         dispatch(fetchOrdersStart());
         axios.get(`users/${username}/orders`).then( resp => {
@@ -102,4 +103,7 @@ export const fetchOrders = (username) => {
         }).catch( error => dispatch(fetchOrdersFail(error)));
     }
 }
+
+
+
 

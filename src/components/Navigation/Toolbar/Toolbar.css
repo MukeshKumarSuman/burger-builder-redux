@@ -26,3 +26,9 @@
         display: none;
     }
 }
+
+.Toolbar p {
+    font-size: x-large;
+    color: aliceblue;
+    text-shadow: 2px 2px darkolivegreen;
+}

@@ -1,9 +1,9 @@
 import * as actionTypes from '../actions/actionTypes';
 
-
 const initialState = {
-    customer : null,
-    error: false
+    order : null,
+    error: false,
+    building: false
 }
 
 const INGREDIENT_PRICES = {
@@ -18,40 +18,37 @@ const reducer = (state = initialState, action) => {
         case actionTypes.ADD_INGREDIENT:
             return {
                 ...state,
-                customer: {
-                    ...state.customer,
-                    order: {
-                        ...state.customer.order,
-                        ingredients: {
-                            ...state.customer.order.ingredients,
-                            [action.ingredientName]: state.customer.order.ingredients[action.ingredientName] + 1
-                        },
-                        price: state.customer.order.price + INGREDIENT_PRICES[action.ingredientName]
-                    }
-                }
+                order: {
+                    ...state.order,
+                    ingredients: {
+                        ...state.order.ingredients,
+                        [action.ingredientName]: state.order.ingredients[action.ingredientName] + 1
+                    },
+                    price: state.order.price + INGREDIENT_PRICES[action.ingredientName]
+                },
+                building: true
             }
         case actionTypes.REMOVE_INGREDIENT:
             return {
                 ...state,
-                customer: {
-                    ...state.customer,
-                    order: {
-                        ...state.customer.order,
-                        ingredients: {
-                            ...state.customer.order.ingredients,
-                            [action.ingredientName]: state.customer.order.ingredients[action.ingredientName] - 1
-                        },
-                        price: state.customer.order.price - INGREDIENT_PRICES[action.ingredientName]
-                    }
-                }
+                order: {
+                    ...state.order,
+                    ingredients: {
+                        ...state.order.ingredients,
+                        [action.ingredientName]: state.order.ingredients[action.ingredientName] - 1
+                    },
+                    price: state.order.price - INGREDIENT_PRICES[action.ingredientName]
+                },
+                building: true
             }
-        case actionTypes.SET_CUSTOMER:
+        case actionTypes.SET_DEFAULT_ORDER_INGREDIENTS:
             return {
                 ...state,
-                customer: action.customer,
-                error: false
+                order: action.order,
+                error: false,
+                building: false
             }
-        case actionTypes.FETCH_INGREDIENTS_FAILED:
+        case actionTypes.FETCH_DEFAULT_ORDER_INGREDIENTS_FAILED:
             return {
                 ...state,
                 error: true

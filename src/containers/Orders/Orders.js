@@ -64,7 +64,7 @@ class Orders extends Component {
 
 const mapStateToProps = state => {
     return {
-        username: state.burgerBuilder.customer && state.burgerBuilder.customer.username,
+        username: state.auth.username,
         orders: state.order.orders,
         loading: state.order.loading
     }

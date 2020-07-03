@@ -1,5 +1,6 @@
 import * as actionTypes from './actionTypes';
 import axios from '../../axios-order';
+import * as actionCreator from './auth';
 
 export const registrationStart = () => {
     return {
@@ -7,10 +8,9 @@ export const registrationStart = () => {
     }
 }
 
-export const registrationSuccess = authData => {
+export const registrationSuccess = () => {
     return {
-        type: actionTypes.REGISTRATION_SUCCESS,
-        authData
+        type: actionTypes.REGISTRATION_SUCCESS
     }
 }
 
@@ -21,19 +21,23 @@ export const registrationFail = error => {
     }
 }
 
+export const setRegistrationRedirectPath = path => {
+    return {
+        type: actionTypes.SET_REGISTRATION_REDIRECT_PATH,
+        path
+    }
+}
+
 export const register = (userData) => {
     debugger;
     return dispatch => {
         dispatch(registrationStart());
         axios.post(`/register`, userData)
         .then( response => {
-           console.log(response);
-           //dispatch(registrationSuccess());
-           const localStorage = window.localStorage;
-           localStorage.setItem('username', userData.username);
+           actionCreator.processServerResponse(response.data, dispatch);
+           dispatch(registrationSuccess());
         })
         .catch( error => {
-            console.log(error);
             dispatch(registrationFail(error));
         });
         
